@@ -81,6 +81,22 @@ public class CustomerController {
         custRepo.deleteById(id);
         return new ResponseEntity<>("Customer deleted", HttpStatus.NO_CONTENT);
     }
+    @PatchMapping("/customers/{id}")
+     public ResponseEntity<CustomerDto> updateCustomer(@PathVariable Long id, @RequestBody CustomerDto customerDto) {
+        if (!custRepo.existsById(id)) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        
+        Optional<Customer> existingCustomerOpt = custRepo.findById(id);
+        Customer existingCustomer = existingCustomerOpt.get();
+        
+        // Use mapper to update only non-null fields
+        customerMapper.updateEntityFromDto(customerDto, existingCustomer);
+        Customer savedCustomer = custRepo.save(existingCustomer);
+        
+        CustomerDto updatedCustomerDto = customerMapper.toDto(savedCustomer);
+        return new ResponseEntity<>(updatedCustomerDto, HttpStatus.OK);
+    }
 
 }
 
